@@ -6,7 +6,7 @@
 
 
 
-## Spring 专题 #####
+## Spring 专题（H2） #####
 
 ### [【小家Spring】Spring异步处理@Async的使用以及原理、源码分析（@EnableAsync）](https://blog.csdn.net/f641385712/article/details/89430276)   ???
 
@@ -228,7 +228,21 @@ public class B implements BInterface {
 
 >  关于`@Autowired`和`@Lazy`的联合使用为何是此现象，其实`@Lazy`的代理对象是由`ContextAnnotationAutowireCandidateResolver`生成的，具体参考博文：[【小家Spring】Spring依赖注入(DI)核心接口AutowireCandidateResolver深度分析，解析@Lazy、@Qualifier注解的原理](https://blog.csdn.net/f641385712/article/details/93620967) 
 
-#### 为何@Transactional即使循环依赖也没有问题呢？
+### H3 深入理解 Spring @Lazy 注解以及最佳实践
+
+>## 1 概述
+>
+>- org.springframework.context.annotation.Lazy
+>
+>**`@Lazy` 注解可以提高系统加载速度，`@Component` 注解的 Bean，在启动的时候不会被初始化，只有通过 ApplicationContext 对象的 getBean 方法获取的时候才会初始化；**
+>
+>用于指定单例bean实例化的时机，在没有指定此注解时，单例会在容器初始化时就被创建。而当使用此注解后，单例对象的创建时机会在该bean在被第一次使用时创建，并且只创建一次。第二次及以后获取使用就不再创建。
+>
+>在实际开发场景中，并不是所有bean都要一开始就被创建的，有些可以等到使用时才创建。此时就可以使用该注解实现。
+>
+>此注解只对单例bean有用，原型bean时此注解不起作用。
+
+### 为何@Transactional即使循环依赖也没有问题呢？
 
 最后回答小伙伴给我提问的这个问题：**同为**创建动态代理对象，**同为**一个注解标注在类上 / 方法上，为何`@Transactional`就不会出现这种启动报错呢？
 
