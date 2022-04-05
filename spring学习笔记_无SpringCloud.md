@@ -1018,13 +1018,13 @@ https://www.cnblogs.com/lukelook/p/11169666.html
 >
 >#### 3. @Import 与 @ImportResource
 >
->在 XML 形式的配置中，我们通过 <import resource="XXX.xml"/> 的形式将多个分开的容器配置合到一个配置中，在 JavaConfig 形式的配置中，我们则使用 @Import 这个 Annotation 完成同样目的：
+>在 XML 形式的配置中，我们通过 <import resource="XXX.xml"/> 的**形式将多个分开的容器配置合到一个配置中，**在 JavaConfig 形式的配置中，我们则使用 @Import 这个 Annotation 完成同样目的：
 >
 >```
 >@Configuration@Import(MockConfiguration.class)public class XConfiguration {    ...}
 >```
 >
->@Import 只负责引入 JavaConfig 形式定义的 IoC 容器配置，如果有一些遗留的配置或者遗留系统需要以 XML 形式来配置（比如 dubbo 框架），我们依然可以通过 @ImportResource 将它们一起合并到当前 JavaConfig 配置的容器中。
+>@Import 只负责引入 JavaConfig 形式定义的 IoC 容器配置，**如果有一些遗留的配置或者遗留系统需要以 XML 形式来配置（比如 dubbo 框架）**，我们依然可以通过 @ImportResource 将它们一起合并到当前 JavaConfig 配置的容器中。
 
 [SpringBoot中@SpringBootApplication注解的三体结构解析](http://c.biancheng.net/view/4625.html)
 
@@ -1329,10 +1329,10 @@ Spring中DelegatingFilterProxy 类的作用？
 
 [Spring：代理Filter：DelegatingFilterProxy原理和作用](https://blog.csdn.net/fly910905/article/details/95062258)
 
->DelegatingFilterProxy就是一个对于servlet filter的代理，用这个类的好处主要是通过Spring容器来管理servlet filter的生命周期。
+>**DelegatingFilterProxy就是一个对于servlet filter的代理，用这个类的好处主要是通过Spring容器来管理servlet filter的生命周期。**
 >
->还有就是如果filter中需要一些Spring容器的实例，可以通过spring直接注入，
->另外读取一些配置文件这些便利的操作都可以通过Spring来配置实现。
+>**还有就是如果filter中需要一些Spring容器的实例，可以通过spring直接注入，**
+>**另外读取一些配置文件这些便利的操作都可以通过Spring来配置实现。**
 >
 >DelegatingFilterProxy解决的问题：
 >
@@ -1416,7 +1416,7 @@ FilterRegistrationBean  的作用?
 
 >* Spring Boot Loader 的作用
 >
->SpringBoot 在可执行 jar 包中定义了自己的一套规则，比如第三方依赖jar包在/lib目录下，jar包的URL路径使用自定义的规则并且这个规则需要使用org.springframework.boot.loader.jar.Handler处理器处理。它的Main-Class使用JarLauncher，如果是war包，使用WarLauncher执行。这些Launcher内部都会另起一个线程启动自定义的SpringApplication类。
+>SpringBoot 在可执行 jar 包中定义了自己的一套规则，比如**第三方依赖jar包在/lib目录下**，jar包的URL路径使用自定义的规则并且这个规则需要使用org.springframework.boot.loader.jar.Handler处理器处理。它的Main-Class使用JarLauncher，如果是war包，使用WarLauncher执行。这些Launcher内部都会另起一个线程启动自定义的SpringApplication类。
 >
 >这些特性通过spring-boot-maven-plugin插件打包完成。
 
@@ -1962,7 +1962,7 @@ org.springframework.context.annotation.ComponentScan
 >我们定义 bean 对象，一般使用 @Component，@Service，然后配合 @ComponentScan 使用。 如果引入的对象，不再扫描的包内，那么@Component，@Service定义就无效。
 >所以我们引入@Import来将类引入ioc管理。
 >
->@Import注解在4.2之前只支持导入配置类（需要加@Configuartion注解的是配置类），在4.2及之后的版本中，@Import注解支持导入普通的java类（什么注解都可以）,并将其声明成一个bean, 除非需要支持自动扫描@ComponentScan.
+>**@Import注解在4.2之前只支持导入配置类（需要加@Configuartion注解的是配置类），在4.2及之后的版本中，@Import注解支持导入普通的java类（什么注解都可以）,并将其声明成一个bean, 除非需要支持自动扫描@ComponentScan.**
 
 * [Spring 使用 @Import 的好处是啥？](https://www.zhihu.com/question/428542278)
 
@@ -1970,7 +1970,7 @@ org.springframework.context.annotation.ComponentScan
 >
 >1、通过@CompentScan +@Controller @Service @Respository @compent
 >
->**适合场景**：我们自己写的组件可以通过这种方式来进行加载到容器中。
+>**适合场景：我们自己写的组件可以通过这种方式来进行加载到容器中。**
 >
 >2、通过@Bean的方式来导入组件
 >
@@ -1978,7 +1978,7 @@ org.springframework.context.annotation.ComponentScan
 >
 >3、通过@Import 来导入组件
 >
->**适合场景**：导入组件的id为全路径，用处最多的是其他框架整合Spring时，使用@Import注解导入整合类。注册在类上，不要求该类是否是配置类，一次可以导入多个。
+>**适合场景**：**导入组件的id为全路径，用处最多的是其他框架整合Spring时，使用@Import注解导入整合类。**注册在类上，不要求该类是否是配置类，**一次可以导入多个。**
 
 NOTICE：
 
@@ -2049,7 +2049,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration
 
 >其中最关键的要属`@Import(AutoConfigurationImportSelector.class)`，借助`AutoConfigurationImportSelector`，`@EnableAutoConfiguration`可以帮助SpringBoot应用将所有符合条件的`@Configuration`配置都加载到当前SpringBoot创建并使用的IoC容器。
 >
->借助于Spring框架原有的一个工具类：SpringFactoriesLoader 的支持，`@EnableAutoConfiguration`可以智能的自动配置功效才得以大功告成！
+>**借助于Spring框架原有的一个工具类：SpringFactoriesLoader 的支持，`@EnableAutoConfiguration`可以智能的自动配置功效才得以大功告成！**
 >
 >在AutoConfigurationImportSelector类中可以看到通过 `SpringFactoriesLoader.loadFactoryNames()`
 >把 spring-boot-autoconfigure.jar/META-INF/spring.factories中每一个xxxAutoConfiguration文件都加载到容器中，spring.factories 文件里每一个 xxxAutoConfiguration 文件一般都会有下面的条件注解:
@@ -2098,7 +2098,7 @@ EnableAutoConfigurationImportSelector 中的几个核心方法：
 
 通过 SpringFactoriesLoader 获取配置类的名称：
 
-SpringFactoriesLoader属于Spring框架私有的一种扩展方案(类似于Java的SPI方案java.util.ServiceLoader)，其主要功能就是从指定的配置文件`META-INF/spring-factories`加载配置。
+**SpringFactoriesLoader属于Spring框架私有的一种扩展方案(类似于Java的SPI方案java.util.ServiceLoader)，其主要功能就是从指定的配置文件`META-INF/spring-factories`加载配置。**
 
 在`@EnableAutoConfiguration`场景中，SpringFactoriesLoader 它更多提供了一种配置查找的功能支持，即根据`@EnableAutoConfiguration`的完整类名`org.springframework.boot.autoconfig.EnableAutoConfiguration`作为查找的Key，获得对应的一组`@Configuration`类。
 
@@ -2330,7 +2330,7 @@ org.springframework.beans.factory.annotation.Value
 
 #### @EnableConfigurationProperties
 
-为带有@ConfigurationProperties注解的Bean提供有效的支持。这个注解可以提供一种方便的方式来将带有@ConfigurationProperties 注解的类注入为Spring容器的Bean。
+**为带有@ConfigurationProperties注解的Bean提供有效的支持。这个注解可以提供一种方便的方式来将带有@ConfigurationProperties 注解的类注入为Spring容器的Bean。**
 
 ```java
 @ConfigurationProperties(prefix = "hello") //获取属性值
@@ -3003,7 +3003,7 @@ SpringMVC 流程图如下：
 >
 >**6、数据库引擎不支持事务**
 >
->这种情况出现的概率并不高，事务能否生效数据库引擎是否支持事务是关键。常用的MySQL数据库默认使用支持事务的innodb引擎。一旦数据库引擎切换成不支持事务的myisam，那事务就从根本上失效了。
+>这种情况出现的概率并不高，**事务能否生效数据库引擎是否支持事务是关键。常用的MySQL数据库默认使用支持事务的innodb引擎。一旦数据库引擎切换成不支持事务的myisam，那事务就从根本上失效了。**
 
 # DelegatingFilterProxy
 
@@ -3044,3 +3044,163 @@ https://www.baeldung.com/spring-delegating-filter-proxy
  */
  @RunWith(SpringRunner.class)
 ```
+
+
+
+# mybatis 专题
+
+## [mybatis一级缓存二级缓存 ](https://www.cnblogs.com/happyflyingpig/p/7739749.html)
+
+>## 一级缓存
+>
+>　　Mybatis对缓存提供支持，但是在没有配置的默认情况下，它只开启一级缓存，**一级缓存只是相对于同一个SqlSession而言**。所以在参数和SQL完全一样的情况下，我们使用同一个SqlSession对象调用一个Mapper方法，往往只执行一次SQL，因为使用SelSession第一次查询后，MyBatis会将其放在缓存中，以后再查询的时候，如果没有声明需要刷新，并且缓存没有超时的情况下，SqlSession都会取出当前缓存的数据，而不会再次发送SQL到数据库。
+>
+>![image-20220329174818948](spring学习笔记_无SpringCloud.assets/image-20220329174818948.png)
+>
+>为什么要使用一级缓存，不用多说也知道个大概。但是还有几个问题我们要注意一下。
+>
+>　　**1、一级缓存的生命周期有多长？**
+>
+>　　a、MyBatis在开启一个数据库会话时，会 创建一个新的SqlSession对象，SqlSession对象中会有一个新的Executor对象。Executor对象中持有一个新的PerpetualCache对象；当会话结束时，SqlSession对象及其内部的Executor对象还有PerpetualCache对象也一并释放掉。
+>
+>　　b、如果SqlSession调用了close()方法，会释放掉一级缓存PerpetualCache对象，一级缓存将不可用。
+>
+>　　c、如果SqlSession调用了clearCache()，会清空PerpetualCache对象中的数据，但是该对象仍可使用。
+>
+>　　d、SqlSession中执行了任何一个update操作(update()、delete()、insert()) ，都会清空PerpetualCache对象的数据，但是该对象可以继续使用
+>
+>　  **2、怎么判断某两次查询是完全相同的查询？**
+>
+>　　mybatis认为，对于两次查询，如果以下条件都完全一样，那么就认为它们是完全相同的两次查询。
+>
+>　　2.1 传入的statementId
+>
+>　　2.2 查询时要求的结果集中的结果范围
+>
+>　　2.3. 这次查询所产生的最终要传递给JDBC java.sql.Preparedstatement的Sql语句字符串（boundSql.getSql() ）
+>
+>　　2.4 传递给java.sql.Statement要设置的参数值
+>
+>## 二级缓存：
+>
+>　　MyBatis的二级缓存是Application级别的缓存，它可以提高对数据库查询的效率，以提高应用的性能。
+>
+>### 　　MyBatis的缓存机制整体设计以及二级缓存的工作模式
+>
+>![image-20220329175015925](spring学习笔记_无SpringCloud.assets/image-20220329175015925.png)
+>
+>**SqlSessionFactory 层面上的二级缓存默认是不开启的，**二级缓存的开席需要进行配置，实现二级缓存的时候，MyBatis要求返回的POJO必须是可序列化的。 也就是要求实现Serializable接口，配置方法很简单，只需要在映射XML文件配置就可以开启缓存了<cache/>，如果我们配置了二级缓存就意味着：
+>
+>- 映射语句文件中的所有select语句将会被缓存。
+>- 映射语句文件中的所欲insert、update和delete语句会刷新缓存。
+>- 缓存会使用默认的 Least Recently Used（LRU，最近最少使用的）算法来收回。
+>- 根据时间表，比如No Flush Interval,（CNFI没有刷新间隔），缓存不会以任何时间顺序来刷新。
+>- 缓存会存储列表集合或对象(无论查询方法返回什么)的1024个引用.
+>- 缓存会被视为是read/write(可读/可写)的缓存，意味着对象检索不是共享的，而且可以安全的被调用者修改，不干扰其他调用者或线程所做的潜在修改。
+
+## Mybatis-Plus 系列文章
+
+>https://www.hangge.com/blog/cache/category_80_6.html
+
+## [SpringBoot - MyBatis-Plus使用详解8（Mapper的CRUD接口5：增删改操作)](https://www.hangge.com/blog/cache/detail_2915.html)
+
+>```java
+>// 查询条件：名字中包含'ha'并且年龄小于40
+>LambdaUpdateWrapper<UserInfo> updateWrapper = new LambdaUpdateWrapper<>();
+>updateWrapper.like(UserInfo::getUserName,"ha").lt(UserInfo::getAge,40)
+>   .set(UserInfo::getPassWord, "8888")
+>   .set(UserInfo::getAge, null);
+>// 开始修改，返回影响的记录数
+>int i = userInfoMapper.update(null, updateWrapper);
+>
+>
+>/*********** 二者可以结合使用的，下面效果等效于上面的 ****************/
+>
+>// 查询条件：名字中包含'ha'并且年龄小于40
+>LambdaUpdateWrapper<UserInfo> updateWrapper = new LambdaUpdateWrapper<>();
+>updateWrapper.like(UserInfo::getUserName,"ha").lt(UserInfo::getAge,40)
+>   .set(UserInfo::getAge, null);
+>// 将满足条件的记录密码都设置为8888
+>UserInfo userInfo = new UserInfo();
+>userInfo.setPassWord("8888");
+>// 开始修改，返回影响的记录数
+>int i = userInfoMapper.update(userInfo, updateWrapper);
+>```
+>
+>```java
+>// 查询条件：名字中包含'ha'并且年龄小于40
+>LambdaUpdateWrapper<UserInfo> updateWrapper = new LambdaUpdateWrapper<>();
+>updateWrapper.like(UserInfo::getUserName,"ha").lt(UserInfo::getAge,40)
+>   .setSql("pass_word = '8888'")
+>   .setSql("age = null");
+>// 开始修改，返回影响的记录数
+>int i = userInfoMapper.update(null, updateWrapper);
+>
+>/*********** 二者可以结合使用的，下面效果等效于上面的 ****************/
+>
+>// 查询条件：名字中包含'ha'并且年龄小于40
+>LambdaUpdateWrapper<UserInfo> updateWrapper = new LambdaUpdateWrapper<>();
+>updateWrapper.like(UserInfo::getUserName,"ha").lt(UserInfo::getAge,40)
+>   .setSql("age = null");
+>// 将满足条件的记录密码都设置为8888
+>UserInfo userInfo = new UserInfo();
+>userInfo.setPassWord("8888");
+>// 开始修改，返回影响的记录数
+>int i = userInfoMapper.update(userInfo, updateWrapper);
+>```
+>
+>上面每次编写完构造语句后都要将对象传递给 **mapper** 的 **update** 方法，比较麻烦，**MyBatisPlus** 提供了函数式编程方式：
+>
+>```java
+>boolean success = new LambdaUpdateChainWrapper<>(userInfoMapper)
+>   .like(UserInfo::getUserName,"ha")
+>   .lt(UserInfo::getAge,40)
+>   .set(UserInfo::getPassWord, "8888")
+>   .set(UserInfo::getAge, null)
+>   .update();
+>
+>/*********** 二者可以结合使用的，下面效果等效于上面的 ****************/
+>
+>UserInfo userInfo = new UserInfo();
+>userInfo.setPassWord("8888");
+>boolean success = new LambdaUpdateChainWrapper<>(userInfoMapper)
+>   .like(UserInfo::getUserName,"ha")
+>   .lt(UserInfo::getAge,40)
+>   .set(UserInfo::getAge, null)
+>   .update(userInfo);
+>```
+>
+>下面是结合 **setSql** 使用：
+>
+>```java
+>boolean success = new LambdaUpdateChainWrapper<>(userInfoMapper)
+>   .like(UserInfo::getUserName,"ha")
+>   .lt(UserInfo::getAge,40)
+>   .setSql("pass_word = '8888'")
+>   .setSql("age = null")
+>   .update();
+>
+>/*********** 二者可以结合使用的，下面效果等效于上面的 ****************/
+>
+>UserInfo userInfo = new UserInfo();
+>userInfo.setPassWord("8888");
+>boolean success = new LambdaUpdateChainWrapper<>(userInfoMapper)
+>   .like(UserInfo::getUserName,"ha")
+>   .lt(UserInfo::getAge,40)
+>   .setSql("age = null")
+>   .update(userInfo);
+>```
+
+## h2 mybatis-plus思维导图，让mybatis-plus不再难懂    ？？？？
+
+https://www.jianshu.com/p/df543044e8e2
+
+## h2 Mybatis-Plus和Mybatis的区别
+
+https://blog.csdn.net/qq_34508530/article/details/88943858
+总结：MP的宗旨是简化开发，但是它在提供方便的同时却容易造成代码层次混乱，我们可能会把大量数据逻辑写到service层甚至contoller层中，使代码难以阅读。凡事过犹不及，在使用MP时一定要做分析，不要将所有数据操作都交给MP去实现。毕竟MP只是mybatis的增强工具，它并没有侵入mybatis的原生功能，在使用MP的增强功能的同时，原生mybatis的功能依然是可以正常使用的
+
+## 《深入理解mybatis原理》 MyBatis 的架构设计以及实例分析  ???(很好的文章，还没看)
+
+https://blog.csdn.net/luanlouis/article/details/40422941
+
