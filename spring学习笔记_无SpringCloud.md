@@ -6,7 +6,335 @@
 
 
 
-## Spring 专题（H2） #####
+## Spring 专题 #####
+
+### RequestContextHolder
+
+【Spring】RequestContextHolder简析
+
+>1. RequestContextHolder为什么能获取到当前的HttpServletRequest
+>2. HttpServletRequest是在什么时候设置到RequestContextHolder
+>
+>```java
+>package org.springframework.web.context.request;
+>
+>/**
+> * Holder class to expose the web request in the form of a thread-bound
+> * {@link RequestAttributes} object. The request will be inherited
+> * by any child threads spawned by the current thread if the
+> * {@code inheritable} flag is set to {@code true}.
+> *
+> * <p>Use {@link RequestContextListener} or
+> * {@link org.springframework.web.filter.RequestContextFilter} to expose
+> * the current web request. Note that
+> * {@link org.springframework.web.servlet.DispatcherServlet}
+> * already exposes the current request by default.
+> *
+> * @author Juergen Hoeller
+> * @author Rod Johnson
+> * @since 2.0
+> * @see RequestContextListener
+> * @see org.springframework.web.filter.RequestContextFilter
+> * @see org.springframework.web.servlet.DispatcherServlet
+> */
+>public abstract class RequestContextHolder  {
+>
+>	private static final boolean jsfPresent =
+>			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
+>
+>	private static final ThreadLocal<RequestAttributes> requestAttributesHolder =
+>			new NamedThreadLocal<>("Request attributes");
+>
+>	private static final ThreadLocal<RequestAttributes> inheritableRequestAttributesHolder =
+>			new NamedInheritableThreadLocal<>("Request context");
+>
+>
+>	/**
+>	 * Reset the RequestAttributes for the current thread.
+>	 */
+>	public static void resetRequestAttributes() {
+>		requestAttributesHolder.remove();
+>		inheritableRequestAttributesHolder.remove();
+>	}
+>
+>	/**
+>	 * Bind the given RequestAttributes to the current thread,
+>	 * <i>not</i> exposing it as inheritable for child threads.
+>	 * @param attributes the RequestAttributes to expose
+>	 * @see #setRequestAttributes(RequestAttributes, boolean)
+>	 */
+>	public static void setRequestAttributes(@Nullable RequestAttributes attributes) {
+>		setRequestAttributes(attributes, false);
+>	}
+>
+>	/**
+>	 * Bind the given RequestAttributes to the current thread.
+>	 * @param attributes the RequestAttributes to expose,
+>	 * or {@code null} to reset the thread-bound context
+>	 * @param inheritable whether to expose the RequestAttributes as inheritable
+>	 * for child threads (using an {@link InheritableThreadLocal})
+>	 */
+>  //将RequestAttributes对象放入到ThreadLocal中，而HttpServletRequest和HttpServletResponse等则封装在RequestAttributes 对象中，在此处就不对RequestAttributes这个类展开。反正我们需要知道的就是要获取RequestAttributes 对象，然后再从RequestAttributes对象中获取到我们所需要的HttpServletRequest即可
+>	public static void setRequestAttributes(@Nullable RequestAttributes attributes, boolean inheritable) {
+>		if (attributes == null) {
+>			resetRequestAttributes();
+>		}
+>		else {
+>			if (inheritable) {
+>				inheritableRequestAttributesHolder.set(attributes);
+>				requestAttributesHolder.remove();
+>			}
+>			else {
+>				requestAttributesHolder.set(attributes);
+>				inheritableRequestAttributesHolder.remove();
+>			}
+>		}
+>	}
+>
+>	/**
+>	 * Return the RequestAttributes currently bound to the thread.
+>	 * @return the RequestAttributes currently bound to the thread,
+>	 * or {@code null} if none bound
+>	 */
+>	@Nullable
+>	public static RequestAttributes getRequestAttributes() {
+>		RequestAttributes attributes = requestAttributesHolder.get();
+>		if (attributes == null) {
+>			attributes = inheritableRequestAttributesHolder.get();
+>		}
+>		return attributes;
+>	}
+>
+>	/**
+>	 * Return the RequestAttributes currently bound to the thread.
+>	 * <p>Exposes the previously bound RequestAttributes instance, if any.
+>	 * Falls back to the current JSF FacesContext, if any.
+>	 * @return the RequestAttributes currently bound to the thread
+>	 * @throws IllegalStateException if no RequestAttributes object
+>	 * is bound to the current thread
+>	 * @see #setRequestAttributes
+>	 * @see ServletRequestAttributes
+>	 * @see FacesRequestAttributes
+>	 * @see javax.faces.context.FacesContext#getCurrentInstance()
+>	 */
+>	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
+>		RequestAttributes attributes = getRequestAttributes();
+>		if (attributes == null) {
+>			if (jsfPresent) {
+>				attributes = FacesRequestAttributesFactory.getFacesRequestAttributes();
+>			}
+>			if (attributes == null) {
+>				throw new IllegalStateException("No thread-bound request found: " +
+>						"Are you referring to request attributes outside of an actual web request, " +
+>						"or processing a request outside of the originally receiving thread? " +
+>						"If you are actually operating within a web request and still receive this message, " +
+>						"your code is probably running outside of DispatcherServlet: " +
+>						"In this case, use RequestContextListener or RequestContextFilter to expose the current request.");
+>			}
+>		}
+>		return attributes;
+>	}
+>
+>
+>	/**
+>	 * Inner class to avoid hard-coded JSF dependency.
+> 	 */
+>	private static class FacesRequestAttributesFactory {
+>
+>		@Nullable
+>		public static RequestAttributes getFacesRequestAttributes() {
+>			FacesContext facesContext = FacesContext.getCurrentInstance();
+>			return (facesContext != null ? new FacesRequestAttributes(facesContext) : null);
+>		}
+>	}
+>
+>}
+>
+>```
+>
+>org.springframework.web.servlet.FrameworkServlet#processRequest
+>
+>```java
+>protected final void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+>        long startTime = System.currentTimeMillis();
+>        Throwable failureCause = null;
+>        LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+>        LocaleContext localeContext = this.buildLocaleContext(request);
+>        RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
+>        ServletRequestAttributes requestAttributes = this.buildRequestAttributes(request, response, previousAttributes);
+>        WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+>        asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new FrameworkServlet.RequestBindingInterceptor());
+>  // 初始化 RequestContextHolder 容器
+>        this.initContextHolders(request, localeContext, requestAttributes);
+>
+>        try {
+>            this.doService(request, response);
+>        } catch (IOException | ServletException var16) {
+>            failureCause = var16;
+>            throw var16;
+>        } catch (Throwable var17) {
+>            failureCause = var17;
+>            throw new NestedServletException("Request processing failed", var17);
+>        } finally {
+>            this.resetContextHolders(request, previousLocaleContext, previousAttributes);
+>            if (requestAttributes != null) {
+>                requestAttributes.requestCompleted();
+>            }
+>
+>            this.logResult(request, response, (Throwable)failureCause, asyncManager);
+>            this.publishRequestHandledEvent(request, response, startTime, (Throwable)failureCause);
+>        }
+>
+>    }
+>```
+>
+> 最终在` this.initContextHolders(request, localeContext, requestAttributes);` 中调用了这个方法：
+>
+>`org.springframework.web.context.request.RequestContextHolder#setRequestAttributes(org.springframework.web.context.request.RequestAttributes, boolean)`
+>
+>```java
+>	public static void setRequestAttributes(@Nullable RequestAttributes attributes, boolean inheritable) {
+>		if (attributes == null) {
+>			resetRequestAttributes();
+>		}
+>		else {
+>			if (inheritable) {
+>				inheritableRequestAttributesHolder.set(attributes);
+>				requestAttributesHolder.remove();
+>			}
+>			else {
+>				requestAttributesHolder.set(attributes);
+>				inheritableRequestAttributesHolder.remove();
+>			}
+>		}
+>	}
+>```
+>
+>简单看下源码，我们可以知道HttpServletRequest是在执行doService方法之前，也就是具体的业务逻辑前进行设置的，然后在执行完业务逻辑或者抛出异常时重置RequestContextHolder移除当前的HttpServletRequest。
+
+### 【Spring】Spring底层核心原理解析
+
+https://blog.csdn.net/haohaoxuexiyai/article/details/123003882
+
+### Spring 如何管理 bean
+
+存入 map 的数据结构中：
+
+org.springframework.beans.factory.support.DefaultListableBeanFactory#beanDefinitionMap
+
+```java
+/** Map of bean definition objects, keyed by bean name. */
+private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+```
+
+### Spring 如何创建 bean
+
+org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean
+
+```java
+protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
+			throws BeanCreationException {
+
+		// Instantiate the bean.
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {
+			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
+		}
+		if (instanceWrapper == null) {
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		Object bean = instanceWrapper.getWrappedInstance();
+		Class<?> beanType = instanceWrapper.getWrappedClass();
+		if (beanType != NullBean.class) {
+			mbd.resolvedTargetType = beanType;
+		}
+
+		// Allow post-processors to modify the merged bean definition.
+		synchronized (mbd.postProcessingLock) {
+			if (!mbd.postProcessed) {
+				try {
+					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"Post-processing of merged bean definition failed", ex);
+				}
+				mbd.postProcessed = true;
+			}
+		}
+
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Eagerly caching bean '" + beanName +
+						"' to allow for resolving potential circular references");
+			}
+			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+		}
+
+		// Initialize the bean instance.
+		Object exposedObject = bean;
+		try {
+			populateBean(beanName, mbd, instanceWrapper);
+			exposedObject = initializeBean(beanName, exposedObject, mbd);
+		}
+		catch (Throwable ex) {
+			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
+				throw (BeanCreationException) ex;
+			}
+			else {
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
+			}
+		}
+
+		if (earlySingletonExposure) {
+			Object earlySingletonReference = getSingleton(beanName, false);
+			if (earlySingletonReference != null) {
+				if (exposedObject == bean) {
+					exposedObject = earlySingletonReference;
+				}
+				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
+					String[] dependentBeans = getDependentBeans(beanName);
+					Set<String> actualDependentBeans = new LinkedHashSet<>(dependentBeans.length);
+					for (String dependentBean : dependentBeans) {
+						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+							actualDependentBeans.add(dependentBean);
+						}
+					}
+					if (!actualDependentBeans.isEmpty()) {
+						throw new BeanCurrentlyInCreationException(beanName,
+								"Bean with name '" + beanName + "' has been injected into other beans [" +
+								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+								"] in its raw version as part of a circular reference, but has eventually been " +
+								"wrapped. This means that said other beans do not use the final version of the " +
+								"bean. This is often the result of over-eager type matching - consider using " +
+								"'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for example.");
+					}
+				}
+			}
+		}
+
+		// Register bean as disposable.
+		try {
+			registerDisposableBeanIfNecessary(beanName, bean, mbd);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanCreationException(
+					mbd.getResourceDescription(), beanName, "Invalid destruction signature", ex);
+		}
+
+		return exposedObject;
+	}
+```
+
+### [@Async Spring异步任务的深入学习与使用](https://blog.csdn.net/weixin_43767015/article/details/110135495) 讲得全面，简洁，容易理解
+
+>![image-20220519111415659](spring学习笔记_无SpringCloud.assets/image-20220519111415659.png)
+>
 
 ### [【小家Spring】Spring异步处理@Async的使用以及原理、源码分析（@EnableAsync）](https://blog.csdn.net/f641385712/article/details/89430276)   ???
 
