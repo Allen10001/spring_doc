@@ -8,6 +8,10 @@
 
 ## Spring 专题 #####
 
+
+
+https://blog.csdn.net/bufegar0/article/details/108447557
+
 ### RequestContextHolder
 
 【Spring】RequestContextHolder简析
@@ -788,6 +792,16 @@ https://segmentfault.com/a/1190000021217176
 **在不同类中，事务方法A调用非事务方法B，事务生效。**
 
 
+
+# SpringBoot
+
+## springboot项目打成jar包和war包，并部署（快速打包部署）
+
+https://blog.csdn.net/weixin_52850476/article/details/122862281
+
+## SpringBoot开启数据Gzip压缩
+
+https://blog.csdn.net/MyronCham/article/details/121635691
 
 ## SpringBoot自动配置 - @Enable* & @Import & @Role注解
 
