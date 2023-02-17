@@ -346,6 +346,12 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 
 ### [【小家Spring】从基于@Transactional全注解方式的声明式事务入手，彻底掌握Spring事务管理的原理](https://blog.csdn.net/f641385712/article/details/89607829)   ???
 
+
+
+### Spring为何需要三级缓存解决循环依赖，而不是二级缓存？
+
+https://blog.csdn.net/qq_42046105/article/details/123540097
+
 ### [一文告诉你Spring是如何利用“三级缓存“巧妙解决Bean的循环依赖问题的【享学Spring】](https://blog.csdn.net/f641385712/article/details/92801300)
 
 构造器注入构成的循环依赖，此种循环依赖方式是无法解决的，只能抛出BeanCurrentlyInCreationException异常表示循环依赖。这也是构造器注入的最大劣势（它有很多独特的优势，请小伙伴自行发掘）
@@ -361,13 +367,13 @@ Spring创建Bean的流程
 对Bean的创建最为核心三个方法解释如下：
 
 createBeanInstance：实例化，其实也就是调用对象的构造方法实例化对象
-populateBean：填充属性，这一步主要是对bean的依赖属性进行注入(@Autowired)
+populateBean：填充属性，**这一步主要是对bean的依赖属性进行注入**(@Autowired)
 initializeBean：回到一些形如initMethod、InitializingBean等方法
-从对单例Bean的初始化可以看出，循环依赖主要发生在第二步（populateBean），也就是field属性注入的处理。
+从对单例Bean的初始化可以看出，**循环依赖主要发生在第二步**（populateBean），也就是field属性注入的处理。
 
-Spring容器的'三级缓存'
+**Spring容器的'三级缓存'**
 在Spring容器的整个声明周期中，单例Bean有且仅有一个对象。这很容易让人想到可以用缓存来加速访问。
-从源码中也可以看出Spring大量运用了Cache的手段，在循环依赖问题的解决过程中甚至不惜使用了“三级缓存”，这也便是它设计的精妙之处~
+从源码中也可以看出**Spring大量运用了Cache的手段**，在循环依赖问题的解决过程中甚至不惜使用了**“三级缓存”，**这也便是它设计的精妙之处~
 
 三级缓存其实它更像是Spring容器工厂的内的术语，采用三级缓存模式来解决循环依赖问题，这三级缓存分别指：
 
@@ -395,9 +401,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 注：AbstractBeanFactory继承自DefaultSingletonBeanRegistry~
 
-singletonObjects：用于存放完全初始化好的 bean，从该缓存中取出的 bean 可以直接使用
-earlySingletonObjects：提前曝光的单例对象的cache，存放原始的 bean 对象（尚未填充属性），用于解决循环依赖
-singletonFactories：单例对象工厂的cache，存放 bean 工厂对象，用于解决循环依赖
+**singletonObjects：用于存放完全初始化好的 bean，从该缓存中取出的 bean 可以直接使用**
+**earlySingletonObjects：提前曝光的单例对象的cache，存放原始的 bean 对象（尚未填充属性），用于解决循环依赖**
+**singletonFactories：单例对象工厂的cache，存放 bean 工厂对象，用于解决循环依赖**
 
 ```java
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
@@ -441,7 +447,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 2. **如果获取不到或者对象正在创建中（isSingletonCurrentlyInCreation()），那就再从二级缓存earlySingletonObjects中获取。（如果获取到就直接return）.**
 3. **如果还是获取不到，且允许singletonFactories（allowEarlyReference=true）通过getObject()获取。就从三级缓存singletonFactory.getObject()获取。（如果获取到了就从singletonFactories中移除，并且放进earlySingletonObjects。其实也就是从三级缓存移动（是剪切、不是复制哦~）到了二级缓存）.**
 
-getSingleton() 从缓存里获取单例对象步骤分析可知，Spring 解决循环依赖的诀窍：就在于singletonFactories 这个三级缓存。这个Cache里面都是 ObjectFactory，它是解决问题的关键。
+getSingleton() 从缓存里获取单例对象步骤分析可知，Spring 解决循环依赖的诀窍：**就在于singletonFactories 这个三级缓存。这个Cache里面都是 ObjectFactory，它是解决问题的关键。**
 
 ```java
 // 它可以将创建对象的步骤封装到ObjectFactory中 交给自定义的Scope来选择是否需要创建对象来灵活的实现scope。  具体参见Scope接口
@@ -455,7 +461,7 @@ public interface ObjectFactory<T> {
 
 **此处说一下二级缓存 earlySingletonObjects 它里面的数据什么时候添加什么移除？？?**
 
-添加：向里面添加数据只有一个地方，就是上面说的getSingleton()里从三级缓存里挪过来
+添加：向里面添加数据只有一个地方，就是上面说的getSingleton()里从三级缓存里挪过来。
 移除：addSingleton、addSingletonFactory、removeSingleton从语义中可以看出添加单例、添加单例工厂ObjectFactory的时候都会删除二级缓存里面对应的缓存值，是互斥的.
 
 **循环依赖对AOP代理对象创建流程和结果的影响**
@@ -476,12 +482,12 @@ public interface ObjectFactory<T> {
 
 对于整体过程，读者朋友只要理解两点：
 
-- Spring是通过递归的方式获取目标bean及其所依赖的bean的；
-- Spring实例化一个bean的时候，是分两步进行的，首先实例化目标bean，然后为其注入属性。
+- Spring 是通过递归的方式获取目标bean及其所依赖的bean的；
+- Spring 实例化一个bean的时候，是分两步进行的，**首先实例化目标bean，然后为其注入属性。**
 
-结合这两点，也就是说，Spring在实例化一个bean的时候，是首先递归的实例化其所依赖的所有bean，直到某个bean没有依赖其他bean，此时就会将该实例返回，然后反递归的将获取到的bean设置为各个上层bean的属性的。
+结合这两点，也就是说，**Spring在实例化一个bean的时候，是首先递归的实例化其所依赖的所有bean，直到某个bean没有依赖其他bean，此时就会将该实例返回，然后反递归的将获取到的bean设置为各个上层bean的属性的。**
 
-spring 默认使用三级缓存解决循环依赖问题。特殊情况下会导致循环依赖失效。 比如 1.互相循环依赖使用构造器注入。 2. 通过类似 @Async 注解在对象初始化时期被生成代理对象替换原对象原因
+spring 默认使用三级缓存解决循环依赖问题。特殊情况下会导致循环依赖失效。 比如 **1.互相循环依赖使用构造器注入。 2. 通过类似 @Async 注解在对象初始化时期被生成代理对象替换原对象原因**
 
 ### [使用@Async异步注解导致该Bean在循环依赖时启动报BeanCurrentlyInCreationException异常的根本原因分析，以及提供解决方案【享学Spring】](https://cloud.tencent.com/developer/article/1497689)
 
