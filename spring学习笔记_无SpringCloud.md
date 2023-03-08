@@ -2,15 +2,33 @@
 
 
 
-[TOC]
-
-
-
 ## Spring 专题 #####
 
+## 微服务预热那些事
+
+https://cloud.tencent.com/developer/article/1929835?areaSource=102001.14&traceId=6TDjkhubY-qjitjN6EVDk
+
+>
+>
+>
+
+## Spring中的事务Transactional，这样用真的对么？ (长事务)
+
+https://juejin.cn/post/7033036488766193678
+
+>
+>
+>
+
+## SpringRetry（spring的重试机制）——只需一个注解
+
+https://blog.csdn.net/qq_48607414/article/details/128042278
+
+>
+>
+>
 
 
-https://blog.csdn.net/bufegar0/article/details/108447557
 
 ### RequestContextHolder
 
